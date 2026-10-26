@@ -39,7 +39,7 @@ No canviïs de nivell amb una sala ja començada: usa un codi de sala nou o rein
 ### Solucionari del nivell bàsic
 - Dispositiu `XXX-PC0n` → IP `192.168.<VLAN>.<10+n>` (p. ex. COM-PC02 = `192.168.20.12`). VLAN: ADM 10, COM 20, RRH 30, LOG 40, DEV 50, DIR 60.
 - Màscara `255.255.255.0` · passarel·la `192.168.<VLAN>.1` · DNS `192.168.100.10`.
-- Impressora `192.168.100.50` (port 9100), controlador **Lumina LP-4040dn PCL6**. La resta (doble cara, formulari, consola, tòner a `http://192.168.100.50/consumibles`) és igual que a l'avançat.
+- **La impressora es detecta sola** a Impressores i escàners › «Afegeix un dispositiu», però només si la xarxa de l'equip està ben configurada (si no, surt «No s'ha trobat cap impressora»). Un clic a «Afegeix el dispositiu» la instal·la amb el controlador i el port correctes: l'alumne no ha de triar protocol ni port. Impressora `192.168.100.50`, controlador **Lumina LP-4040dn PCL6**. Si algú vol fer-ho a mà (assistent «La impressora que vull no apareix»), en escriure la IP el Windows detecta el port sol i salta directament a triar el controlador. La resta (doble cara, formulari, consola, tòner a `http://192.168.100.50/consumibles`) és igual que a l'avançat.
 - Errors típics que passen: DHCP → IP 169.254.x.x; màscara equivocada (p. ex. 255.0.0.0); passarel·la d'un altre departament; IP de la impressora mal escrita.
 
 > Les taules de la secció 3 són del nivell **avançat**.

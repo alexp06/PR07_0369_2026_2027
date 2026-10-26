@@ -206,7 +206,20 @@
       ]);
       body.appendChild(add);
       if (st.search === "busy") body.appendChild(h("div", { class: "set-searching" }, [h("span", { class: "spinner" }), " Cercant impressores i escàners a la xarxa…"]));
-      if (st.search === "none") body.appendChild(h("div", { class: "set-card notfound" }, [
+      var found = D.level === "basic" && st.search === "none" && App.checkPort({ proto: "RAW", host: D.printer.ip, number: 9100 }).ok;
+      var already = App.state.printers.some(function (x) { return x.port && x.port.host === D.printer.ip; });
+      if (found) {
+        body.appendChild(h("div", { class: "set-card found" }, [
+          h("div", {}, [h("strong", { text: "🖨 " + D.printer.model }), h("div", { class: "muted", text: "Impressora de xarxa · " + D.printer.ip + " · Zona comuna" })]),
+          already ? h("span", { class: "muted", text: "Ja l'has afegida" }) : h("button", { class: "w-btn primary", type: "button", text: "Afegeix el dispositiu", onclick: function () {
+            var port = { name: "IP_" + D.printer.ip, proto: "RAW", host: D.printer.ip, number: 9100, queue: "" };
+            if (!App.state.ports.some(function (x) { return x.name === port.name; })) App.state.ports.push(clone(port));
+            App.state.printers.push({ id: "p" + Date.now(), name: D.printer.model, driver: "Lumina LP-4040dn PCL6", port: port, isDefault: App.state.printers.length === 0, duplexUnit: false, tray2: false, prefs: { duplex: "none", paper: "A4", orient: "portrait" }, shared: false });
+            App.touch(); App.toast("Impressora afegida", D.printer.model + " ja està instal·lada.", "ok"); App.refreshWin(id);
+          } })
+        ]));
+      } else if (D.level === "basic" && st.search === "none") body.appendChild(h("div", { class: "w-msg info", text: "Pista: si l'equip no està ben connectat a la xarxa (mira la configuració de xarxa), el Windows no pot veure la impressora." }));
+      if (st.search === "none" && !found) body.appendChild(h("div", { class: "set-card notfound" }, [
         h("span", { text: "No s'ha trobat cap impressora ni cap escàner." }),
         h("button", { class: "w-link", type: "button", text: "La impressora que vull no apareix a la llista", onclick: function () { App.openApp("wizard"); } })
       ]));
@@ -319,7 +332,11 @@
           }
           go("detecting");
           var c = N.connect(App.device, App.state.net, r.ip, "udp", 161);   // consulta SNMP
-          setTimeout(function () { App.logDeny(c.deny); if (App.isOpen(id) && wz.step === "detecting") go("portinfo"); }, 1500);
+          setTimeout(function () {
+            App.logDeny(c.deny);
+            if (!App.isOpen(id) || wz.step !== "detecting") return;
+            if (D.level === "basic" && c.ok) { wz.port = { name: wz.portName || wz.host, proto: "RAW", host: wz.host, number: 9100, queue: "" }; wz.driver = ""; wz.maker = "Lumina"; go("driver"); } else go("portinfo");
+          }, 1500);
         }, "Següent", "choose"));
       } else if (wz.step === "detecting") {
         box.appendChild(h("h2", { text: "S'està detectant el port TCP/IP" }));

@@ -118,9 +118,10 @@
     var dept = D.deptById(deptId);
     if (dst === D.printer.ip) {
       if (proto === "icmp") return { allow: true };
+      if (dept.anyProto && proto === "udp" && port === 161) return { allow: true };
       if (proto === "tcp" && (port === 80 || port === 443)) return { allow: true };
       if (proto === "tcp" && (port === dept.port || (dept.anyProto && [515, 631, 9100].indexOf(port) !== -1))) return { allow: true };
-      return { allow: false, why: "La VLAN " + dept.vlan + " (" + dept.name + ") només té permès " + dept.proto + " (" + dept.port + "/tcp) cap a la impressora" };
+      return { allow: false, why: dept.anyProto ? "El tallafoc ha bloquejat aquesta connexió cap a la impressora" : "La VLAN " + dept.vlan + " (" + dept.name + ") només té permès " + dept.proto + " (" + dept.port + "/tcp) cap a la impressora" };
     }
     if (dst === D.dns.ip) {
       if (proto === "icmp" || port === 53) return { allow: true };
@@ -137,7 +138,7 @@
     var t = hostAt(dst);
     if (!t) return false;
     if (proto === "icmp") return true;
-    if (t.kind === "printer") return [80, 443, 515, 631, 9100].indexOf(port) !== -1;
+    if (t.kind === "printer") return proto === "udp" ? port === 161 : [80, 443, 515, 631, 9100].indexOf(port) !== -1;
     if (t.kind === "dns") return port === 53;
     if (t.kind === "router") return port === 22 || port === 443;
     return false;

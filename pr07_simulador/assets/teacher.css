@@ -156,7 +156,7 @@ body.t-login #app { min-height: 100vh; display: grid; place-items: center; paddi
 .fw-log { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-height: 360px; overflow-y: auto; font-size: 13px; }
 .fw-log li { display: grid; grid-template-columns: 70px 84px 1fr; gap: 8px; padding: 6px 8px; border-radius: 6px; background: #F6F8FA; }
 .fw-log li.deny { background: var(--err-soft); }
-.fw-log .fw-t { font-family: var(--mono); color: var(--muted); }
+.fw-log .fw-t { font-family: var(--mono); color: var(--muted); font-size: 13px; font-weight: 400; fill: none; }
 .fw-log .fw-k { font-weight: 700; font-size: 11px; letter-spacing: .04em; align-self: center; }
 .fw-log li.deny .fw-k { color: var(--err); }
 .fw-log .fw-m { font-family: var(--mono); word-break: break-word; }

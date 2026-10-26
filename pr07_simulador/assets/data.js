@@ -149,7 +149,7 @@
       { id: "t1", title: "Connecta el dispositiu a la xarxa del teu departament",
         help: "Obre «Configuració de xarxa». Tria «Utilitza l'adreça IP següent» i escriu els 4 valors de la teva Fitxa: adreça IP, màscara, passarel·la i DNS. Quan estigui bé, l'estat dirà «Connectat»." },
       { id: "t2", title: "Instal·la la impressora de la Zona comuna i imprimeix una pàgina de prova",
-        help: "Impressores i escàners › Afegeix un dispositiu › «La impressora que vull no apareix». Tria «Afegeix una impressora mitjançant una adreça TCP/IP», escriu l'adreça IP de la impressora (és a la Fitxa), deixa el port estàndard i tria el controlador «Lumina LP-4040dn PCL6». Marca-la com a predeterminada i imprimeix la pàgina de prova." },
+        help: "Impressores i escàners › «Afegeix un dispositiu». Espera que acabi la cerca: si la xarxa està ben configurada, la impressora Lumina LP-4040dn apareixerà a la llista. Prem «Afegeix el dispositiu». Després fes clic al nom de la impressora i prem «Imprimeix una pàgina de prova»." },
       { id: "t3", title: "Configura la impressora perquè imprimeixi a doble cara",
         help: "Propietats de la impressora › Configuració del dispositiu: a «Unitat d'impressió a doble cara» posa «Instal·lada». Després, a Preferències d'impressió, tria «Imprimeix per les dues cares»." },
       { id: "t4", title: "Imprimeix un document des de la línia d'ordres",
