@@ -46,6 +46,9 @@ No canviïs de nivell amb una sala ja començada: usa un codi de sala nou o rein
 
 ---
 
+### Com generar l'enllaç de cada grup
+Obre `…/docent.html`, tria el **grup** (1r ASIX A → sala `ASIXA`, 1r ASIX B → sala `ASIXB`, o «Una altra sala…») i el **nivell**. Sota el PIN apareix l'**enllaç per a l'alumnat**, amb el botó *Copia l'enllaç*: és el que has de posar a la pràctica. Un cop dins, el mateix botó és a la capçalera. Cada grup té la seva cua, el seu tòner i els seus dispositius, així que has d'obrir la pantalla del docent de la sala que estigui fent la pràctica.
+
 ## 1. Posada en marxa (uns 15 minuts, només el primer cop)
 
 ### A) Base de dades compartida (Supabase, gratuït)

@@ -30,15 +30,34 @@
     seenJobs: null, seenEvents: null, jobStatus: {}, engine: null, speed: 5, detail: null, tab: "progress"
   };
 
+  var ROOMS = [["ASIXA", "1r ASIX A"], ["ASIXB", "1r ASIX B"]];
+  function studentUrlFor(room, level) { return new URL("./?sala=" + encodeURIComponent(room) + (level === "avancat" ? "&nivell=avancat" : ""), location.href).href; }
+  function copyText(txt, btn) {
+    function ok() { var o = btn.textContent; btn.textContent = "Copiat ✓"; setTimeout(function () { btn.textContent = o; }, 1600); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, fallback); else fallback();
+    function fallback() { var ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); ok(); } catch (e) { /* ignore */ } ta.remove(); }
+  }
+
   // ------------------------------------------------------------------ entrada
   function login(msg) {
     document.body.className = "t-login";
     var app = $("#app"); app.innerHTML = "";
-    var roomIn = h("input", { class: "t-input", value: T.room, maxlength: "24", "aria-label": "Sala" });
+    var known = ROOMS.some(function (r) { return r[0] === T.room; });
+    var roomSel = h("select", { class: "t-input", "aria-label": "Grup" }, ROOMS.map(function (r) { return h("option", { value: r[0], text: r[1] + "  (sala " + r[0] + ")", selected: r[0] === T.room ? true : null }); }).concat([h("option", { value: "_altra", text: "Una altra sala…", selected: known ? null : true })]));
+    var roomIn = h("input", { class: "t-input", value: known ? "" : T.room, maxlength: "24", placeholder: "Codi de sala (lletres i números)", "aria-label": "Codi de sala", style: known ? "display:none" : "" });
+    var levelSel = h("select", { class: "t-input", "aria-label": "Nivell" }, [h("option", { value: "basic", text: "Bàsic (sense subnetting)", selected: D.level === "basic" ? true : null }), h("option", { value: "avancat", text: "Avançat (subnetting i protocols)", selected: D.level === "avancat" ? true : null })]);
+    var urlBox = h("input", { class: "t-input mono", readonly: "", "aria-label": "Enllaç per a l'alumnat", onfocus: function (e) { e.target.select(); } });
+    var copyBtn = h("button", { class: "t-btn", type: "button", text: "Copia l'enllaç", onclick: function () { copyText(urlBox.value, copyBtn); } });
+    function curRoom() { return roomSel.value === "_altra" ? B.normRoom(roomIn.value) : roomSel.value; }
+    function upd() { roomIn.style.display = roomSel.value === "_altra" ? "" : "none"; urlBox.value = curRoom() ? studentUrlFor(curRoom(), D.level) : ""; }
+    roomSel.addEventListener("change", function () { upd(); if (roomSel.value === "_altra") roomIn.focus(); });
+    roomIn.addEventListener("input", upd);
+    levelSel.addEventListener("change", function () { var u = new URL(location.href); u.searchParams.set("sala", curRoom() || T.room); if (levelSel.value === "avancat") u.searchParams.set("nivell", "avancat"); else u.searchParams.delete("nivell"); location.href = u.toString(); });
+    upd();
     var pinIn = h("input", { class: "t-input", type: "password", autocomplete: "off", "aria-label": "PIN del docent" });
     var err = h("div", { class: "t-err", role: "alert", text: msg || "" });
     function go() {
-      T.room = B.normRoom(roomIn.value) || T.room;
+      T.room = curRoom() || T.room;
       try { T.backend = B.create(T.room); } catch (e) { err.textContent = e.message; return; }
       T.backend.teacherCheck(pinIn.value).then(function (r) {
         if (!r || !r.ok) { err.textContent = "PIN incorrecte."; return; }
@@ -51,7 +70,9 @@
     pinIn.addEventListener("keydown", function (e) { if (e.key === "Enter") go(); });
     app.appendChild(h("div", { class: "t-login-card" }, [
       h("div", { class: "t-brand" }, [h("span", { class: "t-mark", text: "BT" }), h("div", {}, [h("div", { class: "t-brand-name", text: D.company }), h("div", { class: "t-brand-sub", text: "Centre de control de la xarxa · Docent" })])]),
-      h("label", { class: "t-field" }, ["Sala", roomIn]),
+      h("label", { class: "t-field" }, ["Grup", roomSel]), roomIn,
+      h("label", { class: "t-field" }, ["Nivell", levelSel]),
+      h("div", { class: "t-field" }, [h("span", {}, "Enllaç per a l'alumnat (el que has de posar a la pràctica)"), urlBox, copyBtn]),
       h("label", { class: "t-field" }, ["PIN del docent", pinIn]),
       err,
       h("button", { class: "t-btn primary", type: "button", text: "Entra", onclick: go }),
@@ -64,10 +85,11 @@
   function start() {
     document.body.className = "t-main";
     var app = $("#app"); app.innerHTML = "";
-    var studentUrl = new URL("./?sala=" + encodeURIComponent(T.room) + (PR07_DATA.level === "avancat" ? "&nivell=avancat" : ""), location.href).href;
+    var studentUrl = studentUrlFor(T.room, D.level);
     app.appendChild(h("header", { class: "t-head" }, [
       h("div", { class: "t-head-l" }, [h("span", { class: "t-mark sm", text: "BT" }), h("div", {}, [h("strong", { text: D.company + " · Centre de control" }), h("div", { class: "t-sub", text: "Sala " + T.room + " · alumnat: " + studentUrl })])]),
       h("div", { class: "t-head-r" }, [
+        h("button", { class: "t-btn", type: "button", text: "Copia l'enllaç de l'alumnat", onclick: function (e) { copyText(studentUrl, e.target); } }),
         h("span", { class: "t-pill " + (T.backend.mode === "demo" ? "demo" : "live"), id: "tConn", text: T.backend.mode === "demo" ? "Mode demostració" : "En línia" }),
         h("button", { class: "t-btn", type: "button", text: "Mode projector", onclick: function () { document.body.classList.toggle("proj"); if (document.body.classList.contains("proj") && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {}); } }),
         h("button", { class: "t-btn danger", type: "button", text: "Reinicia la partida", onclick: resetGame }),
