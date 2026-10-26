@@ -184,7 +184,7 @@
         var dg = N.diagnose(App.device, App.state.net);
         if (dg.code === "conflict") App.toast("Conflicte d'adreces IP", dg.msg, "error");
         st.msg = warn ? { kind: "warn", text: warn + " S'ha desat igualment." } : { kind: "ok", text: "S'ha aplicat la configuració." };
-        App.touch(); App.refreshWin(id);
+        App.touch(); App.refreshWin(id); App.refreshWhere("printers");
       }
     },
     onclose: dropWs
