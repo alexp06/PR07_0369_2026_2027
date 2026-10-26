@@ -84,7 +84,7 @@
     if (!p.t2 && f.t2) p.t2 = f.t2;
     if (!p.t3 && st.printers.some(function (pr) { var di = App.driverInfo(pr.driver); return di && di.ok && pr.duplexUnit && pr.prefs && pr.prefs.duplex !== "none"; })) p.t3 = now;
     if (!p.t4 && f.t4) p.t4 = f.t4;
-    if (!p.t5 && st.forms.some(function (fm) { return App.formMatches(fm.name) && fm.w >= 5 && fm.h >= 5 && fm.w <= 60 && fm.h <= 60; })) p.t5 = now;
+    if (!p.t5 && st.forms.some(function (fm) { return App.formMatches(fm.name) && fm.w >= 1 && fm.h >= 1 && fm.w <= 100 && fm.h <= 100; })) p.t5 = now;
     if (!p.t6 && f.t6) p.t6 = f.t6;
     if (!p.bonus && f.bonus) p.bonus = f.bonus;
   };
