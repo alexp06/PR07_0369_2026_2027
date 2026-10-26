@@ -8,7 +8,7 @@
    tot es guarda només al navegador on l'obres (PIN docent de prova: 1234).
    ===================================================================== */
 window.PR07_CONFIG = {
-  supabaseUrl: "xdrimdicxseajcfbheqe.supabase.co",
+  supabaseUrl: "https://xdrimdicxseajcfbheqe.supabase.co",
   supabaseKey: "sb_publishable_tUWGvtu8Duf_w0BPBtNkqw_rHdsK2vz",
   defaultRoom: "ASIXB"
 };
