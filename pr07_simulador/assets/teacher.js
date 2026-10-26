@@ -64,7 +64,7 @@
   function start() {
     document.body.className = "t-main";
     var app = $("#app"); app.innerHTML = "";
-    var studentUrl = new URL("./?sala=" + encodeURIComponent(T.room), location.href).href;
+    var studentUrl = new URL("./?sala=" + encodeURIComponent(T.room) + (PR07_DATA.level === "avancat" ? "&nivell=avancat" : ""), location.href).href;
     app.appendChild(h("header", { class: "t-head" }, [
       h("div", { class: "t-head-l" }, [h("span", { class: "t-mark sm", text: "BT" }), h("div", {}, [h("strong", { text: D.company + " · Centre de control" }), h("div", { class: "t-sub", text: "Sala " + T.room + " · alumnat: " + studentUrl })])]),
       h("div", { class: "t-head-r" }, [
@@ -193,7 +193,7 @@
         s("rect", { x: p[0], y: p[1], width: BW, height: 44, rx: 16, fill: dp.color, class: "dept-h" }),
         s("rect", { x: p[0], y: p[1] + 28, width: BW, height: 16, fill: dp.color }),
         s("text", { x: p[0] + 16, y: p[1] + 28, class: "dept-t", text: dp.name }),
-        s("text", { x: p[0] + BW - 14, y: p[1] + 28, "text-anchor": "end", class: "dept-s", text: "VLAN " + dp.vlan + " · " + dp.proto + " " + dp.port })
+        s("text", { x: p[0] + BW - 14, y: p[1] + 28, "text-anchor": "end", class: "dept-s", text: "VLAN " + dp.vlan + (dp.anyProto ? "" : " · " + dp.proto + " " + dp.port) })
       ]);
       g.appendChild(s("g", { id: "tiles-" + dp.id }));
       svg.appendChild(g);
@@ -372,7 +372,7 @@
         h("div", {}, [h("h3", { text: "Configuració IPv4" }), kvTable([
           ["Mode", net.mode === "static" ? "Estàtica" : "DHCP (APIPA)"], ["IP", (net.ip || "—") + (net.ip && net.ip !== dv.ip ? "  ✗ (assignada: " + dv.ip + ")" : "")],
           ["Màscara", (net.mask || "—") + (net.mask && net.mask !== dp.mask ? "  ✗ (" + dp.mask + ")" : "")], ["Passarel·la", (net.gw || "—") + (net.gw && net.gw !== dp.gw ? "  ✗ (" + dp.gw + ")" : "")],
-          ["DNS", [net.dns1, net.dns2].filter(Boolean).join(", ") || "—"], ["Protocol permès", dp.proto + " (" + dp.port + "/tcp)"]
+          ["DNS", [net.dns1, net.dns2].filter(Boolean).join(", ") || "—"], ["Protocol permès", dp.anyProto ? dp.protoLabel : dp.proto + " (" + dp.port + "/tcp)"]
         ])]),
         h("div", {}, [h("h3", { text: "Impressores instal·lades" }), printers.length ? h("ul", { class: "dl-list" }, printers.map(function (p) {
           var port = p.port || {};

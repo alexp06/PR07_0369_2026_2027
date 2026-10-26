@@ -308,7 +308,7 @@
           h("div", { class: "mis-company", text: D.company }),
           h("div", { class: "mis-who", text: App.name }),
           h("div", { class: "mis-dev" }, [
-            h("span", { class: "dept-chip", style: "background:" + App.dept.color, text: App.dept.name + " · VLAN " + App.dept.vlan }),
+            h("span", { class: "dept-chip", style: "background:" + App.dept.color, text: App.dept.name + (D.level === "basic" ? "" : " · VLAN " + App.dept.vlan) }),
             h("span", { class: "dev-chip", text: App.device.id })
           ]),
           h("div", { class: "mis-progress" }, [h("div", { class: "mis-bar" }, h("div", { id: "missionBar" })), h("span", { id: "missionCount" })])
@@ -523,7 +523,7 @@
       D.departments.forEach(function (dp) {
         var devs = D.devices.filter(function (d) { return d.dept === dp.id; });
         grid.appendChild(h("div", { class: "pick-dept", style: "--dc:" + dp.color }, [
-          h("div", { class: "pd-head" }, [h("strong", { text: dp.name }), h("span", { text: "VLAN " + dp.vlan })]),
+          h("div", { class: "pd-head" }, [h("strong", { text: dp.name }), h("span", { text: D.level === "basic" ? dp.net + "/24" : "VLAN " + dp.vlan })]),
           h("div", { class: "pd-devs" }, devs.map(function (dv) {
             var c = claims.filter(function (x) { return x.device_id === dv.id; })[0];
             return h("button", { class: "pick-dev" + (c ? " taken" : ""), type: "button", disabled: c ? true : null, onclick: function () { claim(dv.id); } }, [
@@ -550,7 +550,7 @@
     var recCode = h("input", { class: "w-input", placeholder: "XXXX-XXXX-XXXX-XXXX-XXXX-XXXX", "aria-label": "Codi de recuperació" });
     root.appendChild(h("div", { class: "land-card wide" }, [
       h("div", { class: "land-brand" }, [h("span", { class: "brand-mark", text: "BT" }), h("div", {}, [h("div", { class: "brand-name", text: D.company }), h("div", { class: "brand-sub", text: "Simulador de xarxa i impressió · PR07" })])]),
-      h("p", { class: "land-intro", text: "L'empresa té una xarxa separada per a cada departament i una impressora compartida a la Zona comuna. Agafa un dispositiu i aconsegueix imprimir-hi correctament." }),
+      h("p", { class: "land-intro", text: D.level === "basic" ? "L'empresa té una xarxa per a cada departament i una impressora compartida a la Zona comuna. Agafa un dispositiu, configura'l amb les dades de la teva Fitxa i aconsegueix imprimir-hi." : "L'empresa té una xarxa separada per a cada departament i una impressora compartida a la Zona comuna. Agafa un dispositiu i aconsegueix imprimir-hi correctament." }),
       h("div", { class: "land-row" }, [
         h("label", {}, ["Nom i cognoms", nameIn]),
         h("label", { class: "room" }, ["Sala", roomIn])

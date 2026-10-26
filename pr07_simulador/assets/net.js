@@ -119,7 +119,7 @@
     if (dst === D.printer.ip) {
       if (proto === "icmp") return { allow: true };
       if (proto === "tcp" && (port === 80 || port === 443)) return { allow: true };
-      if (proto === "tcp" && port === dept.port) return { allow: true };
+      if (proto === "tcp" && (port === dept.port || (dept.anyProto && [515, 631, 9100].indexOf(port) !== -1))) return { allow: true };
       return { allow: false, why: "La VLAN " + dept.vlan + " (" + dept.name + ") només té permès " + dept.proto + " (" + dept.port + "/tcp) cap a la impressora" };
     }
     if (dst === D.dns.ip) {

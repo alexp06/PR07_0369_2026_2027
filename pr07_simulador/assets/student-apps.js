@@ -36,15 +36,28 @@
       body.appendChild(h("div", { class: "ticket" }, [
         h("div", { class: "tk-head" }, [h("span", { class: "brand-mark sm", text: "BT" }), h("div", {}, [h("strong", { text: "Ordre de treball IT-2026-" + (1100 + D.devices.indexOf(dv)) }), h("div", { class: "muted", text: "Assignació i posada en marxa d'equip" })])]),
         h("table", { class: "kv" }, [
-          row("Usuari", App.name), row("Equip", dv.id), row("Departament", dp.name + " (VLAN " + dp.vlan + ")"),
+          row("Usuari", App.name), row("Equip", dv.id), row("Departament", dp.name + (D.level === "basic" ? "" : " (VLAN " + dp.vlan + ")")),
           row("Adreça IP assignada", dv.ip + "  (estàtica)"), row("Adreça física (MAC)", dv.mac),
-          row("Màscara i passarel·la", "Les de la VLAN del departament (Intranet IT › Mapa de xarxa)"),
-          row("Servidor DNS", "El servidor DNS intern de l'empresa (Intranet IT › Inventari)")
+          D.level === "basic" ? row("Màscara de subxarxa", dp.mask) : row("Màscara i passarel·la", "Les de la VLAN del departament (Intranet IT › Mapa de xarxa)"),
+          D.level === "basic" ? row("Passarel·la predeterminada", dp.gw) : null,
+          D.level === "basic" ? row("Servidor DNS", D.dns.ip) : row("Servidor DNS", "El servidor DNS intern de l'empresa (Intranet IT › Inventari)"),
+          D.level === "basic" ? row("Impressora de la Zona comuna", D.printer.ip + "  (" + D.printer.model + ")") : null
         ]),
         h("h3", { text: "Tasques" }),
         h("ol", { class: "tk-tasks" }, D.missions.map(function (m) { return h("li", { text: m.title.replace("[el teu nom]", App.firstName()) }); })),
-        h("p", { class: "muted", text: "Recorda: a l'empresa no hi ha DHCP als departaments i les xarxes dels departaments estan aïllades entre elles. Només es pot arribar a la Zona comuna pels serveis que permet el tallafoc." })
+        D.level === "basic" ? glossary() : h("p", { class: "muted", text: "Recorda: a l'empresa no hi ha DHCP als departaments i les xarxes dels departaments estan aïllades entre elles. Només es pot arribar a la Zona comuna pels serveis que permet el tallafoc." })
       ]));
+      function glossary() {
+        function t(k, v) { return h("li", {}, [h("strong", { text: k + ": " }), v]); }
+        return h("details", { class: "gloss", open: "" }, [h("summary", { text: "Què vol dir cada cosa?" }), h("ul", {}, [
+          t("Adreça IP", "el «número de telèfon» de l'ordinador a la xarxa. No pot haver-hi dos equips amb la mateixa."),
+          t("IP estàtica", "una IP que escrius tu a mà i que no canvia. Al contrari, amb «Obtén una adreça automàticament» (DHCP) un servidor te'n dona una; si no n'hi ha cap, el Windows se n'inventa una que comença per 169.254 i no et deixa sortir de l'equip."),
+          t("Màscara de subxarxa", "diu quina part de la IP és «el carrer» (la xarxa) i quina «el número de la porta» (l'equip). Aquí sempre és 255.255.255.0: els tres primers números són la xarxa i l'últim és l'equip."),
+          t("Passarel·la", "la «porta de sortida» de la teva xarxa: el router. Per parlar amb un equip d'una altra xarxa (com la impressora) cal passar per ella."),
+          t("DNS", "la «guia telefònica»: tradueix noms (prn-comuna.badiatech.local) a adreces IP."),
+          t("Port", "la «porta» concreta d'un equip per la qual entra un servei. La impressora rep treballs pel port 9100.")
+        ])]);
+      }
       function row(k, v) { return h("tr", {}, [h("th", { text: k }), h("td", { text: v })]); }
     }
   };
@@ -56,7 +69,7 @@
       var st = ws(id, function () { return { tab: "mapa" }; });
       var panel = tabs(body, [{ id: "mapa", label: "Mapa de xarxa" }, { id: "inv", label: "Inventari" }, { id: "fw", label: "Política del tallafoc" }, { id: "normes", label: "Normes d'IT" }], st.tab, function (t) { st.tab = t; App.refreshWin(id); });
       if (st.tab === "mapa") {
-        panel.appendChild(h("p", { text: "Cada departament té la seva VLAN i la seva subxarxa. Totes passen pel router/tallafoc central FW-CORE." }));
+        panel.appendChild(h("p", { text: D.level === "basic" ? "Cada departament té la seva xarxa. Totes passen pel router central FW-CORE per arribar a la Zona comuna, on hi ha la impressora." : "Cada departament té la seva VLAN i la seva subxarxa. Totes passen pel router/tallafoc central FW-CORE." }));
         var rows = D.departments.map(function (dp) {
           return h("tr", {}, [h("td", { text: String(dp.vlan) }), h("td", {}, [h("span", { class: "dot", style: "background:" + dp.color }), dp.name]), h("td", { class: "mono", text: dp.net }), h("td", { class: "mono", text: dp.mask }), h("td", { class: "mono", text: dp.gw })]);
         });
@@ -83,7 +96,7 @@
           ["Totes les VLAN", D.dns.ip + " (DNS)", "DNS (53/udp, 53/tcp), ICMP", "Permet"],
           ["Totes les VLAN", D.printer.ip + " (impressora)", "ICMP, HTTP (80/tcp), HTTPS (443/tcp)", "Permet"]
         ];
-        D.departments.forEach(function (dp) { fr.push(["VLAN " + dp.vlan + " · " + dp.name, D.printer.ip + " (impressora)", dp.proto + " (" + dp.port + "/tcp)", "Permet"]); });
+        if (D.level === "basic") fr.push(["Totes les VLAN", D.printer.ip + " (impressora)", "Impressió: RAW (9100/tcp), LPR (515/tcp), IPP (631/tcp)", "Permet"]); else D.departments.forEach(function (dp) { fr.push(["VLAN " + dp.vlan + " · " + dp.name, D.printer.ip + " (impressora)", dp.proto + " (" + dp.port + "/tcp)", "Permet"]); });
         fr.push(["VLAN de departaments", "Altres VLAN de departaments", "Qualsevol", "Denega"]);
         fr.push(["Qualsevol", "Qualsevol", "Qualsevol (regla implícita)", "Denega"]);
         panel.appendChild(h("table", { class: "w-table" }, [h("thead", {}, h("tr", {}, ["Origen", "Destinació", "Servei", "Acció"].map(function (t) { return h("th", { text: t }); }))),
@@ -92,9 +105,9 @@
       } else {
         panel.appendChild(h("ul", { class: "rules" }, [
           h("li", { text: "Cada equip té una adreça IP estàtica assignada per IT. No en facis servir cap altra: provocaries conflictes." }),
-          h("li", { text: "La màscara i la passarel·la són les de la VLAN del teu departament." }),
+          h("li", { text: D.level === "basic" ? "La màscara i la passarel·la són les que surten a la teva Fitxa." : "La màscara i la passarel·la són les de la VLAN del teu departament." }),
           h("li", { text: "Fes servir el DNS intern per resoldre els noms dels equips de l'empresa." }),
-          h("li", { text: "La impressora de la Zona comuna s'ha d'instal·lar amb el protocol que el tallafoc permet al teu departament i amb el controlador correcte." }),
+          h("li", { text: D.level === "basic" ? "La impressora de la Zona comuna s'afegeix per la seva adreça IP i amb el controlador del model exacte (Lumina LP-4040dn)." : "La impressora de la Zona comuna s'ha d'instal·lar amb el protocol que el tallafoc permet al teu departament i amb el controlador correcte." }),
           h("li", { text: "Per estalviar paper, la impressora s'ha de configurar a doble cara." })
         ]));
       }
@@ -135,6 +148,7 @@
           h("strong", { text: "Estat: " + (gwOk ? "Connectat" : (e.apipa ? "Xarxa no identificada" : "Sense accés a la xarxa")) }),
           h("span", { class: "mono", text: "IPv4 actual: " + (e.ip || "—") + (e.apipa ? " (APIPA)" : "") })
         ]),
+        D.level === "basic" ? h("div", { class: "w-msg info", text: "Pista: copia els valors de la teva Fitxa del dispositiu. Si no tens cap adreça pròpia, el Windows en posa una que comença per 169.254 i no podràs sortir de l'equip." }) : null,
         h("p", { class: "muted", text: "Podeu fer que la configuració IP s'assigni automàticament si la xarxa és compatible amb aquesta funció. Altrament, heu de demanar la configuració IP adequada a l'administrador de la xarxa." }),
         h("fieldset", { class: "w-fieldset" }, [
           h("label", { class: "w-radio" }, [h("input", { type: "radio", name: id + "m", checked: !isStatic ? true : null, onchange: function () { setMode("dhcp"); } }), " Obtén una adreça IP automàticament"]),

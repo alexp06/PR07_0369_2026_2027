@@ -25,6 +25,25 @@ Tots els documents que imprimeixen arriben a **una mateixa cua compartida** que 
 
 El codi de **sala** (p. ex. `ASIXB`) separa grups: cada sala té els seus dispositius, la seva cua i el seu tòner.
 
+## 0. Nivells de dificultat
+
+El simulador té **dos nivells**, que es trien amb l'enllaç (cal que alumnat i docent facin servir el mateix):
+
+| Nivell | Enllaç | Què canvia |
+|---|---|---|
+| **Bàsic** (per defecte) | `…/?sala=ASIXB` · `…/docent.html?sala=ASIXB` | Sense subnetting. Totes les xarxes són `192.168.X.0/24` (màscara `255.255.255.0`, passarel·la `.1`), el tallafoc deixa passar RAW, LPR i IPP, i la **Fitxa del dispositiu** ja dona els 4 valors a escriure (IP, màscara, passarel·la, DNS) i l'IP de la impressora. Inclou un petit glossari («què és una IP estàtica, la màscara, la passarel·la…»). Les missions expliquen pas a pas on clicar. |
+| **Avançat** | `…/?sala=ASIXB&nivell=avancat` · `…/docent.html?sala=ASIXB&nivell=avancat` | Subnetting real, màscares diferents, un únic protocol permès per departament i la fitxa només diu «màscara de la VLAN» (cal consultar la Intranet). Per quan ja s'hagi treballat xarxes. |
+
+No canviïs de nivell amb una sala ja començada: usa un codi de sala nou o reinicia la partida.
+
+### Solucionari del nivell bàsic
+- Dispositiu `XXX-PC0n` → IP `192.168.<VLAN>.<10+n>` (p. ex. COM-PC02 = `192.168.20.12`). VLAN: ADM 10, COM 20, RRH 30, LOG 40, DEV 50, DIR 60.
+- Màscara `255.255.255.0` · passarel·la `192.168.<VLAN>.1` · DNS `192.168.100.10`.
+- Impressora `192.168.100.50` (port 9100), controlador **Lumina LP-4040dn PCL6**. La resta (doble cara, formulari, consola, tòner a `http://192.168.100.50/consumibles`) és igual que a l'avançat.
+- Errors típics que passen: DHCP → IP 169.254.x.x; màscara equivocada (p. ex. 255.0.0.0); passarel·la d'un altre departament; IP de la impressora mal escrita.
+
+> Les taules de la secció 3 són del nivell **avançat**.
+
 ---
 
 ## 1. Posada en marxa (uns 15 minuts, només el primer cop)

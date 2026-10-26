@@ -125,7 +125,44 @@
 
   var BONUS = { id: "bonus", title: "Repte final: imprimeix un document a doble cara amb la mida “Carta de [el teu nom]”" };
 
+
+  // ------------------------------------------------------------------ nivell
+  // "basic" (per defecte): xarxes senzilles 192.168.X.0/24, tothom amb la mateixa màscara, la passarel·la sempre .1
+  // i el tallafoc deixa passar tots els protocols d'impressió. Les dades exactes surten a la Fitxa.
+  // "avancat" (?nivell=avancat): subnetting, màscares diferents i un protocol permès per departament.
+  var LEVEL = (new URLSearchParams(location.search).get("nivell") || "basic").toLowerCase() === "avancat" ? "avancat" : "basic";
+  if (LEVEL === "basic") {
+    PRINTER.ip = "192.168.100.50"; PRINTER.gw = "192.168.100.1"; PRINTER.mask = "255.255.255.0";
+    DNS_SERVER.ip = "192.168.100.10";
+    COMMON_ZONE.net = "192.168.100.0"; COMMON_ZONE.mask = "255.255.255.0"; COMMON_ZONE.gw = "192.168.100.1";
+    DEPARTMENTS.forEach(function (dp) {
+      dp.net = "192.168." + dp.vlan + ".0"; dp.mask = "255.255.255.0"; dp.gw = "192.168." + dp.vlan + ".1";
+      dp.proto = "RAW"; dp.port = 9100; dp.anyProto = true; dp.protoLabel = "tots (RAW, LPR, IPP)";
+    });
+    DEVICES.forEach(function (dv) {
+      var dp = DEPARTMENTS.filter(function (x) { return x.id === dv.dept; })[0];
+      var n = parseInt(dv.id.slice(-2), 10);
+      dv.ip = "192.168." + dp.vlan + "." + (10 + n);
+    });
+    MISSIONS.length = 0;
+    Array.prototype.push.apply(MISSIONS, [
+      { id: "t1", title: "Connecta el dispositiu a la xarxa del teu departament",
+        help: "Obre «Configuració de xarxa». Tria «Utilitza l'adreça IP següent» i escriu els 4 valors de la teva Fitxa: adreça IP, màscara, passarel·la i DNS. Quan estigui bé, l'estat dirà «Connectat»." },
+      { id: "t2", title: "Instal·la la impressora de la Zona comuna i imprimeix una pàgina de prova",
+        help: "Impressores i escàners › Afegeix un dispositiu › «La impressora que vull no apareix». Tria «Afegeix una impressora mitjançant una adreça TCP/IP», escriu l'adreça IP de la impressora (és a la Fitxa), deixa el port estàndard i tria el controlador «Lumina LP-4040dn PCL6». Marca-la com a predeterminada i imprimeix la pàgina de prova." },
+      { id: "t3", title: "Configura la impressora perquè imprimeixi a doble cara",
+        help: "Propietats de la impressora › Configuració del dispositiu: a «Unitat d'impressió a doble cara» posa «Instal·lada». Després, a Preferències d'impressió, tria «Imprimeix per les dues cares»." },
+      { id: "t4", title: "Imprimeix un document des de la línia d'ordres",
+        help: "Obre el Símbol del sistema. Escriu «dir» per veure els fitxers i després: notepad /p nom_del_fitxer.txt  (imprimeix a la impressora predeterminada)." },
+      { id: "t5", title: "Crea una mida de full personalitzada anomenada “Carta de [el teu nom]”",
+        help: "Impressores i escàners › Propietats del servidor d'impressió › pestanya Formularis › marca «Crea un formulari nou», posa-li el nom i les mides i desa'l." },
+      { id: "t6", title: "Consulta el nivell de tòner a la interfície web de la impressora",
+        help: "Obre el navegador i escriu l'adreça IP de la impressora (la de la Fitxa). Entra a «Consumibles» i anota el percentatge de tòner." }
+    ]);
+  }
+
   window.PR07_DATA = {
+    level: LEVEL,
     company: "Badia Tech, S.L.",
     domain: "badiatech.local",
     printer: PRINTER,
